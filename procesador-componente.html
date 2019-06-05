@@ -1,0 +1,109 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+
+<dom-module id="procesador-componente">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      paper-button.btn {
+        background-color: var(--paper-purple-300);
+        color: white
+      }
+      paper-button.btn[active] {
+        background-color: var(--paper-teal-300);
+      }
+      paper-dialog.size-position {
+        position: fixed;
+        top: center;
+        right: center;
+        width: 300px;
+        height: 500px;
+        overflow: auto;
+      }
+    </style>
+    <paper-button toggles id = "boton" class = "btn" raised on-click = "click">Procesador</paper-button>
+    <paper-dialog modal id = "scrolling" class="size-position">
+    <!--<template is = "dom-if" if="[[seleccionado]]"> -->
+      <h2>Procesador:</h2>
+      <paper-dialog-scrollable>
+        <paper-listbox>
+          <template is = "dom-repeat" items = "[[procesadores]]">
+            <piper-item id = "list" on-click = "selecciona">[[item.name]]</piper-item>
+          </template>
+        </paper-listbox>
+    <!--</template>-->
+      </paper-dialog-scrollable>
+      <div class = "buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button id = "click" dialog-confirm autofocus>Aceptar</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+
+  <script>
+    /**
+     * `procesador-componente`
+     * Componente para mostrar las características de una computadora. Como su RAM, hdd, procesador y tarjeta gráfica
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class ProcesadorComponente extends Polymer.Element {
+      static get is() { return 'procesador-componente'; }
+      static get properties() {
+        return {
+          nombreProcesador: {
+            type: String,
+            notify: true,
+          },
+          procesadores: {
+            type: Array,
+            value: [],
+          },
+          seleccionado: {
+            type: Boolean,
+            value: false
+          }
+        };
+      }
+
+      connectedCallback(){
+        super.connectedCallback();
+        this.getAPIInformation();
+      }
+
+      getAPIInformation() {
+        let request = new XMLHttpRequest();
+        let url = "http://demo6292426.mockable.io/processors";
+        request.open('GET', url);
+        request.send();
+        request.onreadystatechange = () => {
+          if (request.readyState === 4) {
+            this.procesadores = JSON.parse(request.response).data;
+          }
+        }
+      }
+
+      selecciona(e){
+        this.set('nombreProcesador', e.model.item.name);
+        //this.set('seleccionado', false);
+        //this.$.scrolling.toggle();
+        //this.$.parr.setAttribute(this.$.collapse.closed);
+      }
+
+      click(){
+        //this.set('seleccionado', true);
+        this.$.scrolling.toggle();
+        //this.$.boton.setAttribute('aria-expanded', this.$.scrolling.opened);
+      };
+    }
+
+    window.customElements.define(ProcesadorComponente.is, ProcesadorComponente);
+  </script>
+</dom-module>

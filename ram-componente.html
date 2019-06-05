@@ -1,0 +1,106 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+
+<dom-module id="ram-componente">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      paper-button.btn {
+        background-color: var(--paper-blue-300);
+        color: white;
+      }
+      paper-button.btn[active] {
+        background-color: var(--paper-pink-300);
+      }
+      paper-dialog.size-position {
+        position: fixed;
+        top: center;
+        right: center;
+        width: 300px;
+        height: 500px;
+        overflow: auto;
+      }
+    </style>
+    <paper-button toggles id = "boton" class = "btn" raised on-click = "click">RAM</paper-button>
+    <paper-dialog modal id = "scrolling" class = "size-position">
+      <h2>Memoria RAM:</h2>
+      <paper-dialog-scrollable>
+        <paper-listbox>
+          <template is = "dom-repeat" items = "[[rams]]">
+            <piper-item id = "lista" on-click = "selecciona">[[item.ramMemory]]</piper-item>
+            <br>
+          </template>
+        </paper-listbox>
+      </paper-dialog-scrollable>
+      <div class = "buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button id = "click" dialog-confirm autofocus>Aceptar</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+
+  <script>
+    /**
+     * `ram-componente`
+     * Componente para mostrar las características de una computadora. Como su RAM, hdd, procesador y tarjeta gráfica
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class RamComponente extends Polymer.Element {  
+      static get is() { return 'ram-componente'; }
+      static get properties() {
+        return {
+          tamanioRam: {
+            type: String,
+            notify: true
+          },
+          rams: {
+            type: Array,
+            value: []
+          },
+          seleccionado: {
+            type: Boolean,
+            value: false
+          },
+          seleccionAlgo: {
+            type: Boolean,
+            value: false
+          } 
+        };
+      }
+
+      connectedCallback(){
+        super.connectedCallback();
+        this.getAPIInformation();
+      }
+
+      getAPIInformation() {
+        let request = new XMLHttpRequest();
+        let url = "https://demo6292426.mockable.io/ramMemory";
+        request.open('GET', url);
+        request.send();
+        request.onreadystatechange = () => {
+          if (request.readyState === 4) {
+            this.rams = JSON.parse(request.response).data;
+          }
+        }
+      }
+
+      selecciona(e){
+        this.set('tamanioRam', e.model.item.ramMemory);
+      }
+
+      click(){
+        this.$.scrolling.toggle();
+      }
+    }
+    window.customElements.define(RamComponente.is, RamComponente);
+  </script>
+</dom-module>
